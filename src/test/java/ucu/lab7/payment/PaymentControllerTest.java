@@ -1,76 +1,65 @@
 package ucu.lab7.payment;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Integration test for the PaymentController.
- * We use @WebMvcTest to load only the web layer (and not the full application
- * context),
- * focusing specifically on the PaymentController.
- */
 @WebMvcTest(PaymentController.class)
-public class PaymentControllerTest {
+class PaymentControllerTest {
 
-    // MockMvc allows us to send HTTP requests to our controller without a running
-    // server.
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    public void testGetPaymentMethods() throws Exception {
-        mockMvc.perform(get("/payment/"))
+    @DisplayName("GET /payments/ should return all available payment methods")
+    void testGetPaymentMethods() throws Exception {
+        mockMvc.perform(get("/payments/"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$", containsInAnyOrder("PAYPAL", "CREDIT")));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0]", is("PAYPAL")))
+                .andExpect(jsonPath("$[1]", is("CREDIT")))
+                .andExpect(jsonPath("$[2]", is("CASH")));
     }
 
     @Test
-    public void testPostPaymentWithCreditCard() throws Exception {
-        double amount = 125.50;
-        String method = "credit";
-        // Perform a POST request to "/payment/test"
-        mockMvc.perform(post("/payment/test")
-                .param("method", method)
-                .param("amount", String.valueOf(amount)))
+    @DisplayName("GET /payments/paypal?amount=100 should process PayPal payment")
+    void testMakePaymentPaypal() throws Exception {
+        mockMvc.perform(get("/payments/paypal").param("amount", "100"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(
-                        "Payment of " + amount + " UAH via " + method.toUpperCase() + " processed successfully!"));
+                .andExpect(content().string(containsString("Processed payment via PayPal of $100")));
     }
 
     @Test
-    public void testPostPaymentWithPayPal() throws Exception {
-        double amount = 77.00;
-        String method = "paypal";
-
-        // Perform a POST request to "/payment/test"
-        mockMvc.perform(post("/payment/test")
-                .param("method", method)
-                .param("amount", String.valueOf(amount)))
+    @DisplayName("GET /payments/credit?amount=50 should process Credit Card payment")
+    void testMakePaymentCredit() throws Exception {
+        mockMvc.perform(get("/payments/credit").param("amount", "50"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(
-                        "Payment of " + amount + " UAH via " + method.toUpperCase() + " processed successfully!"));
+                .andExpect(content().string(containsString("Processed payment via Credit Card of $50")));
     }
 
     @Test
-    public void testPostPaymentWithInvalidMethod() throws Exception {
-        double amount = 10.00;
-        String method = "bitcoin"; // An unsupported method
+    @DisplayName("GET /payments/cash should process Cash payment with default amount")
+    void testMakePaymentCashDefaultAmount() throws Exception {
+        mockMvc.perform(get("/payments/cash"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Processed payment in Cash")));
+    }
 
-        mockMvc.perform(post("/payment/test")
-                .param("method", method)
-                .param("amount", String.valueOf(amount)))
+    @Test
+    @DisplayName("GET /payments/bitcoin should return 400 for invalid payment method")
+    void testInvalidPaymentMethod() throws Exception {
+        mockMvc.perform(get("/payments/bitcoin"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Unknown payment method: " + method));
+                .andExpect(content().string(containsString("Unknown payment method: bitcoin")));
     }
 }

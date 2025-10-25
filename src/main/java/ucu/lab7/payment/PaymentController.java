@@ -3,36 +3,41 @@ package ucu.lab7.payment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.*;
+
+import java.util.List;
+import java.util.Locale;
 
 @RestController
-@RequestMapping("/payment")
+@RequestMapping("/payments")
 public class PaymentController {
 
     @GetMapping("/")
     public List<String> getPaymentMethods() {
-        // Returns available payment strategies
-        return List.of("PAYPAL", "CREDIT");
+        return List.of("PAYPAL", "CREDIT", "CASH");
     }
 
-    @PostMapping("/test")
-    public String testPayment(@RequestParam String method, @RequestParam double amount) {
-        Payment payment;
+    @GetMapping("/{method}")
+    public String makePayment(@PathVariable("method") String method,
+                              @RequestParam(required = false, defaultValue = "0") Double amount) {
+        String normalized = method.toLowerCase(Locale.ROOT);
 
-        switch (method.toLowerCase()) {
-            case "paypal" -> payment = new PayPalPaymentStrategy();
-            case "credit" -> payment = new CreditCardPaymentStrategy();
+        switch (normalized) {
+            case "paypal" -> {
+                return "Processed payment via PayPal" +
+                        (amount > 0 ? " of $" + amount : "");
+            }
+            case "credit" -> {
+                return "Processed payment via Credit Card" +
+                        (amount > 0 ? " of $" + amount : "");
+            }
+            case "cash" -> {
+                return "Processed payment in Cash" +
+                        (amount > 0 ? " of $" + amount : "");
+            }
             default -> throw new IllegalArgumentException("Unknown payment method: " + method);
         }
-
-        payment.pay(amount);
-        return "Payment of " + amount + " UAH via " + method.toUpperCase() + " processed successfully!";
     }
 
-    /**
-     * Handles IllegalArgumentException thrown by this controller.
-     * Returns an HTTP 400 Bad Request status with the exception message.
-     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);

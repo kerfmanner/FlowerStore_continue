@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import lombok.Getter;
 import ucu.lab7.item.Item;
 
-@Getter
 public class FlowerBucket extends Item {
 
     private List<FlowerPack> flowerPacks;
 
+    public List<FlowerPack> getFlowerPacks() {
+        return new ArrayList<>(this.flowerPacks);
+    }
     public FlowerBucket() {
         this("No description");
     }

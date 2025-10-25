@@ -2,15 +2,9 @@ package ucu.lab7.flower;
 
 import java.util.Objects;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 import ucu.lab7.item.Item;
 
-@AllArgsConstructor
-@Getter
-@Setter
 @ToString
 public class Flower extends Item {
 
@@ -25,6 +19,13 @@ public class Flower extends Item {
         sepalLength = 0.0;
     }
 
+    public FlowerStats getStats() {
+        return new FlowerStats(this.stats);
+    }
+
+    public void setStats(FlowerStats stats) {
+        this.stats = new FlowerStats(stats);
+    }
     public Flower() {
         this("No description");
     }

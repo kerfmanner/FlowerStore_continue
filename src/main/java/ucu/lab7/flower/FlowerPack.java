@@ -2,13 +2,9 @@ package ucu.lab7.flower;
 
 import java.util.Objects;
 
-import lombok.Getter;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import ucu.lab7.item.Item;
 
-@Getter
-@Setter
 public class FlowerPack extends Item {
     private Flower flower;
     private int count;
@@ -17,6 +13,20 @@ public class FlowerPack extends Item {
         this.flower = new Flower(flower);
         this.count = count;
         setDescription(description);
+    }
+
+    public void setCount(int count){
+        this.count = count;
+    }
+    public void setFlower(Flower flower) {
+        this.flower = new Flower(flower);
+    }
+    public Flower getFlower() {
+        return new Flower(this.flower);
+    }
+
+    public int getCount(){
+        return count;
     }
 
     public FlowerPack(Flower flower, int count) {
@@ -35,7 +45,7 @@ public class FlowerPack extends Item {
     }
 
     public double getPrice() {
-        return flower.getPrice() * count;
+        return flower.price() * count;
     }
 
     public FlowerStats getStats() {
