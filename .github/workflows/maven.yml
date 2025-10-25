@@ -41,7 +41,7 @@ jobs:
       with:
         path: '**/checkstyle-result.xml'
     - name: Spotbugs
-      run: mvn spotbugs:check
+      run: mvn com.github.spotbugs:spotbugs-maven-plugin:4.8.4.0:check
     - uses: jwgmeligmeyling/spotbugs-github-action@master
       with:
         path: '**/spotbugsXml.xml'
