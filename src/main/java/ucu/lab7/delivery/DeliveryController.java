@@ -1,48 +1,51 @@
 package ucu.lab7.delivery;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import ucu.lab7.flower.Flower;
 import ucu.lab7.flower.FlowerColor;
 import ucu.lab7.flower.FlowerType;
 import ucu.lab7.item.Item;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/delivery")
 public class DeliveryController {
 
+    private final DeliveryService deliveryService;
+
+    public DeliveryController(DeliveryService deliveryService) {
+        this.deliveryService = deliveryService;
+    }
+
     @GetMapping("/")
     public List<String> getDeliveryMethods() {
-        return List.of("DHL", "POST");
+        return deliveryService.getAvailableMethods();
     }
 
     @GetMapping("/{method}")
-    public String deliver(@PathVariable("method") String method,
-                          @RequestParam(required = false, defaultValue = "2") int itemsCount) {
-        String normalized = method.toLowerCase(Locale.ROOT);
+    public ResponseEntity<String> deliver(
+            @PathVariable("method") String method,
+            @RequestParam(required = false, defaultValue = "2") int itemsCount) {
+
+        String normalized = method.toUpperCase(Locale.ROOT);
 
         LinkedList<Item> items = new LinkedList<>();
         for (int i = 0; i < itemsCount; i++) {
             items.add(new Flower(12, 10.0 + i, FlowerColor.RED, FlowerType.ROSE, "Test flower " + (i + 1)));
         }
 
-        Delivery delivery;
-        switch (normalized) {
-            case "dhl" -> delivery = new DHLDeliveryStrategy();
-            case "post" -> delivery = new PostDeliveryStrategy();
-            default -> throw new IllegalArgumentException("Unknown delivery method: " + method);
+        try {
+            DeliveryType type = DeliveryType.valueOf(normalized);
+            String result = deliveryService.deliver(type, items);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid delivery method: " + method);
         }
-
-        delivery.deliver(items);
-        return "Processed delivery via " + method.toUpperCase(Locale.ROOT)
-                + " for " + itemsCount + " items!";
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }

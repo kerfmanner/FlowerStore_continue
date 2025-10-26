@@ -8,5 +8,9 @@ public abstract class Item {
     @Setter
     private String description;
 
+    protected Item(String description) {
+        this.description = description;
+    }
+    
     public abstract double price();
 }

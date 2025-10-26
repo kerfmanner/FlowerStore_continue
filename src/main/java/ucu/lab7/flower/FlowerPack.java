@@ -10,9 +10,9 @@ public class FlowerPack extends Item {
     private int count;
 
     public FlowerPack(Flower flower, int count, String description) {
+        super(description);
         this.flower = new Flower(flower);
         this.count = count;
-        setDescription(description);
     }
 
     public void setCount(int count){
@@ -38,10 +38,10 @@ public class FlowerPack extends Item {
     }
 
     public FlowerPack(FlowerPack pack, int amount, String description) {
+        super(description);
         this.flower = pack.getFlower();
         pack.reduceCount(amount);
         this.count = amount;
-        setDescription(description);
     }
 
     public double getPrice() {

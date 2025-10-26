@@ -1,51 +1,25 @@
 package ucu.lab7.payment;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+class PaymentStrategyTest {
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-/**
- * Unit tests for the Payment strategy implementations.
- */
-public class PaymentStrategyTest {
-
-    // We need to capture System.out to verify the print statements.
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final PrintStream originalOut = System.out;
-
-    @BeforeEach
-    public void setUpStreams() {
-        System.setOut(new PrintStream(outContent));
-    }
-
-    @AfterEach
-    public void restoreStreams() {
-        System.setOut(originalOut);
+    @Test
+    void testPayPalPaymentStrategy() {
+        Payment payment = new PayPalPaymentStrategy("test@example.com");
+        String result = payment.pay(250.5);
+        assertTrue(result.contains("PayPal"));
+        assertTrue(result.contains("test@example.com"));
+        assertTrue(result.contains("250.50"));
     }
 
     @Test
-    public void testCreditCardPayment() {
-        Payment creditCard = new CreditCardPaymentStrategy();
-        double amount = 150.75;
-        String expectedOutput = String.format("Processing Credit Card payment: %s UAH%n", amount);
-
-        creditCard.pay(amount);
-        assertEquals(expectedOutput, outContent.toString().replace("\r\n", "\n"));
-    }
-
-    @Test
-    public void testPayPalPayment() {
-        Payment payPal = new PayPalPaymentStrategy();
-        double amount = 88.20;
-        String expectedOutput = String.format("Processing PayPal payment: %s UAH%n", amount);
-
-        payPal.pay(amount);
-
-        assertEquals(expectedOutput, outContent.toString().replace("\r\n", "\n"));
+    void testCreditCardPaymentStrategy() {
+        Payment payment = new CreditCardPaymentStrategy("1234567812349999", "Alice");
+        String result = payment.pay(89.9);
+        assertTrue(result.contains("Alice"));
+        assertTrue(result.contains("9999"));
+        assertTrue(result.contains("89.90"));
     }
 }

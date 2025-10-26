@@ -6,6 +6,6 @@ import ucu.lab7.item.Item;
 
 public interface Delivery {
 
-    public void deliver(LinkedList<Item> items);
+    public String deliver(LinkedList<Item> items);
 
 }

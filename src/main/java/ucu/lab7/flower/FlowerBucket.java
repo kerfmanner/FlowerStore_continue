@@ -18,7 +18,7 @@ public class FlowerBucket extends Item {
     }
 
     public FlowerBucket(String description) {
-        setDescription(description);
+        super(description);
         flowerPacks = new ArrayList<FlowerPack>();
     }
 

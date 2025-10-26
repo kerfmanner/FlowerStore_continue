@@ -13,7 +13,7 @@ public class Flower extends Item {
     private double sepalLength;
 
     public Flower(String description) {
-        setDescription(description);
+        super(description);
         stats = new FlowerStats();
         price = 0.0;
         sepalLength = 0.0;
@@ -27,29 +27,29 @@ public class Flower extends Item {
         this.stats = new FlowerStats(stats);
     }
     public Flower() {
-        this("No description");
+        this("");
     }
 
     public Flower(double price, double sepalLength, FlowerColor color, FlowerType type, String description) {
+        super(description);
         this.sepalLength = sepalLength;
         this.price = price;
         this.stats = new FlowerStats(color, type);
-        setDescription(description);
     }
 
     public Flower(double price, double sepalLength, FlowerColor color, FlowerType type) {
-        this(price, sepalLength, color, type, "No description");
+        this(price, sepalLength, color, type, "");
     }
 
     public Flower(Flower flower, String description) {
+        super(description);
         this.sepalLength = flower.sepalLength;
         this.price = flower.price;
         this.stats = new FlowerStats(flower.stats);
-        setDescription(description);
     }
 
     public Flower(Flower flower) {
-        this(flower, "No description");
+        this(flower, "");
     }
 
     public void setFlowerType(FlowerType type) {
